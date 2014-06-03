@@ -186,29 +186,21 @@ endfunction
 " cursor at %HERE%. Used to implement the BufNewFile autocommand.
 "
 function <SID>TLoad()
-	if !line2byte( line( '$' ) + 1 ) == -1
+	if !line2byte(line('$') + 1) == -1
 		return
 	endif
 
-	let l:file_ext = expand("%:e")
-	if l:file_ext == ""
-		let l:file_ext = expand("%:t")
-	endif
-
-	let l:file_dir = <SID>DirName(expand("%:p"))
-
-	let l:depth = exists("g:template_max_depth") ? g:template_max_depth : 0
-	let l:tName = "template." . l:file_ext
-	let l:tFile = <SID>TFind(l:file_dir, l:tName, l:depth)
-	if l:tFile != ""
-		" Read template file and expand variables in it.
-		execute "0r " . l:tFile
-		call <SID>TExpandVars()
-		" This leaves an extra blank line at the bottom, delete it
-		execute line('$') . "d"
-		call <SID>TPutCursor()
-		setlocal nomodified
-	endif
+    if &ft == 'text'
+        let l:guess_list = [&ft, expand('%:e'), expand('%:t')]
+    else
+        let l:guess_list = [expand('%:e'), expand('%:t'), &ft]
+    endif
+    for item in l:guess_list
+        if <SID>TLoadCmd(item) != ''
+            setlocal nomodified
+            break
+        endif
+    endfor
 endfunction
 
 
@@ -227,11 +219,14 @@ function <SID>TLoadCmd(template)
 	endif
 
 	if l:tFile != ""
+		" Read template file and expand variables in it.
 		execute "0r " . l:tFile
 		call <SID>TExpandVars()
+		" This leaves an extra blank line at the bottom, delete it
 		execute line('$') . "d"
 		call <SID>TPutCursor()
 	endif
+    return l:tFile
 endfunction
 
 " Commands {{{1
