@@ -190,8 +190,8 @@ function <SID>TLoad()
 		return
 	endif
 
-    if &ft == 'text'
-        let l:guess_list = [&ft, expand('%:e'), expand('%:t')]
+    if expand('%:e') == 'txt'
+        let l:guess_list = [expand('%:t'), &ft, expand('%:e')]
     else
         let l:guess_list = [expand('%:e'), expand('%:t'), &ft]
     endif
@@ -210,13 +210,9 @@ endfunction
 " makes variable expansion and cursor positioning.
 "
 function <SID>TLoadCmd(template)
-	if filereadable(a:template)
-		let l:tFile = a:template
-	else
-		let l:depth = exists("g:template_max_depth") ? g:template_max_depth : 0
-		let l:tName = "template." . a:template
-		let l:tFile = <SID>TFind(<SID>DirName(expand("%:p")), l:tName, l:depth)
-	endif
+    let l:depth = exists("g:template_max_depth") ? g:template_max_depth : 0
+    let l:tName = "template." . a:template
+    let l:tFile = <SID>TFind(<SID>DirName(expand("%:p")), l:tName, l:depth)
 
 	if l:tFile != ""
 		" Read template file and expand variables in it.
